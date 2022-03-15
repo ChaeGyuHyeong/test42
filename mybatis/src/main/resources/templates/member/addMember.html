@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+	  xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	  layout:decorate="~{layout/default}">
+	<!-- 사용자 정의 title -->
+	<th:block layout:fragment="customTitle">
+		<title th:text="${title}"></title>
+	</th:block>
+	
+	<!-- 사용자 정의 Script -->
+	<th:block layout:fragment="customScript">
+		<script>
+			//$(document).ready(function())
+			$(function(){
+				function validationCheck(data){
+					if(typeof data == 'undefined' || data == '' || data == null){
+						return false;
+					}
+					return true;
+				}
+				$('#idCheck').click(function(){
+					var memberId = $('input[name="memberId"]').val();
+					//console.log(validationCheck(memberId));
+					var vCheck = validationCheck(memberId);
+					if(vCheck){
+						$.ajax({
+							 url: '/member/idCheck'
+							,type: 'POST'
+							,data: {'memberId' : memberId}
+							,dataType: 'json'
+							,success: function(data){
+								console.log(data);
+								// 화면에서 맨처음 아이디를 제외한 모든 입력하는 요소는 비활성화(HTML 속성 추가  disabled="disabled")
+								if(data) {
+									// 아이디 중복이 발생 되지 않은경우(회원가입 가능) 입력하는 요소는 활성화
+									$('#addMemberForm input').prop('disabled', false);
+									$('#addMemberForm select').prop('disabled', false);
+									$('#addMemberForm button').prop('disabled', false);
+								}else {
+									// 아이디 중복이 발생 하는경우(회원가입 불가능) 입력하는 요소는 비활성화
+									$('#addMemberForm input').not('input[name="memberId"]').prop('disabled', true);
+									$('#addMemberForm button').not('#idCheck').prop('disabled', true);
+									$('#addMemberForm select').prop('disabled', true);
+								}
+							}
+						});
+					}
+				});
+				$('#addMemberBtn').click(function(){
+					var isSumit = true;
+					var inputObj = $('#addMemberForm').find('input');
+					$.each(inputObj, function(){
+						var inputData = $(this).val();
+						var result = validationCheck(inputData);
+						
+						//사용자가 입력하지 않은 경우
+						if(!result){
+							alert('필수 항목입니다. 입력해주세요');
+							$(this).focus();
+							isSumit = false;
+							return false;
+						}
+					});
+					//유효성 검사
+					/* 
+					if($('#memberPw').val() == '') $('#memberPw').focus();
+					if($('#memberName').val() == '') $('#memberName').focus();
+					if($('#memberEmail').val() == '') $('#memberEmail').focus();
+					if($('#memberAddr').val() == '') $('#memberAddr').focus();
+					*/
+					if(isSumit) $('#addMemberForm').submit();
+				});
+			});
+		</script>
+	</th:block>
+	
+	<th:block layout:fragment="customContents">
+		<style>
+			table tr:not(:first-child) input {
+				width:100%;
+			}
+		</style>
+		<form id="addMemberForm" th:action="@{/member/addMember}" method="post">
+			<table border="1">
+				<tbody>
+					<tr>
+						<td>회원아이디</td>
+						<td>
+							<input type="text" name="memberId" />
+							<button type="button" id="idCheck">아이디중복체크</button>
+						</td>
+					</tr>
+					<tr>
+						<td>회원비밀번호</td>
+						<td>
+							<input type="text" name="memberPw" disabled="disabled"/>
+						</td>
+					</tr>
+					<tr>
+						<td>회원이름</td>
+						<td>
+							<input type="text" name="memberName" disabled="disabled"/>
+						</td>
+					</tr>
+					<tr>
+						<td>회원권한</td>
+						<td>
+							<select name="memberLevel" style="width: 100%" disabled="disabled">
+								<th:block th:if="${not #lists.isEmpty(memberLevelList)}" th:each="l : ${memberLevelList}">
+									<option th:value="${l.levelNum}">[[${l.levelName}]]</option>
+								</th:block>
+								<th:block th:unless="${not #lists.isEmpty(memberLevelList)}">
+									<option>등록된 회원등급이 없습니다.</option>
+								</th:block>
+							</select>
+						</td>
+					</tr>
+					<tr>
+						<td>회원이메일</td>
+						<td>
+							<input type="text" name="memberEmail" disabled="disabled"/>
+						</td>
+					</tr>
+					<tr>
+						<td>회원주소</td>
+						<td>
+							<input type="text" name="memberAddr" disabled="disabled"/>
+						</td>
+					</tr>
+				</tbody>
+				<tfoot>
+					<tr>
+						<td colspan="2" style="text-align: center;">
+							<button type="button" id="addMemberBtn" disabled="disabled">회원가입</button>
+						</td>
+					</tr>
+				</tfoot>
+			</table>
+		</form>
+	</th:block>
+</html>

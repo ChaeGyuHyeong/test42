@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+	  xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	  layout:decorate="~{layout/default}">
+	<!-- 사용자 정의 title -->
+	<th:block layout:fragment="customTitle">
+		<title th:text="${title}"></title>
+	</th:block>
+	
+	<th:block layout:fragment="customContents">
+		<style>
+			table input {width: 98%;}
+		</style>
+		<form th:action="@{/goods/modifyGoods}" method="post">
+			<table border="1">
+				<tbody>
+					<tr>
+						<td>
+							<label for="goodsName">상품명</label>
+						</td>
+						<td>
+							<input type="text" id="goodsName" name="goodsName" th:value="${goods.goodsName}"/>
+						</td>
+					</tr>
+					<tr>
+						<td>
+							<label for="goodsPrice">상품가격</label>
+						</td>
+						<td>
+							<input type="text" id="goodsPrice" name="goodsPrice" th:value="${goods.goodsPrice}"/>
+						</td>
+					</tr>
+				</tbody>
+				<tfoot>
+					<tr>
+						<td colspan="2" style="text-align: center;">
+							<button type="submit">상품수정</button>
+						</td>
+					</tr>
+				</tfoot>
+			</table>
+		</form>
+	</th:block>
+</html>
